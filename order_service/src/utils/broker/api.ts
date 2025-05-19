@@ -17,6 +17,18 @@ export const getProductDetails = async (productId: number) => {
   }
 };
 
+export const GetStockDetails = async (ids: number[]) => {
+  try {
+    const response = await axios.post(`${catalogUrl}/products/stock`, {
+      ids,
+    });
+    return response.data as Product[];
+  } catch (error) {
+    logger.error(error);
+    throw new NotFoundError("error on getting stock details");
+  }
+};
+
 export const ValidateUser = async (token: string) => {
   try {
     console.log("ValidateUser called", token);

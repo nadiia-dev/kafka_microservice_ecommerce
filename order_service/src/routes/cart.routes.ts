@@ -4,24 +4,38 @@ import * as service from "../service/cart.service";
 import { asyncHandler } from "../utils/asyncHandler";
 import { ValidateRequest } from "../utils/validator";
 import { CartInput, CartSchema } from "../dto/cart.dto";
+import { AuthMiddleware } from "./middleware";
 
 const router = express.Router();
 const repo = repository.CartRepository;
 
 router.post(
   "/cart",
+  AuthMiddleware,
   asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const errors = ValidateRequest<CartInput>(req.body, CartSchema);
+      const user = req.user;
+      if (!user) {
+        next(new Error("User not found"));
+        return;
+      }
 
-      if (errors) {
-        return res.status(404).json({ errors });
+      const error = ValidateRequest<CartInput>(req.body, CartSchema);
+
+      if (error) {
+        return res.status(404).json({ error });
       }
 
       const input: CartInput = req.body;
 
-      const resp = await service.CreateCart({ ...input, customerId: 1 }, repo);
-      return res.status(200).json(resp);
+      const response = await service.CreateCart(
+        {
+          ...input,
+          customerId: user.id,
+        },
+        repo
+      );
+      return res.status(200).json(response);
     } catch (error) {
       next(error);
     }
@@ -30,38 +44,67 @@ router.post(
 
 router.get(
   "/cart",
-  asyncHandler(async (req: Request, res: Response, _: NextFunction) => {
-    const resp = await service.GetCart(req.body.customerId, repo);
-    return res.status(200).json(resp);
+  AuthMiddleware,
+  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user;
+      if (!user) {
+        next(new Error("User not found"));
+        return;
+      }
+      const resp = await service.GetCart(user.id, repo);
+      return res.status(200).json(resp);
+    } catch (error) {
+      next(error);
+    }
   })
 );
 
 router.patch(
   "/cart/:id",
-  asyncHandler(async (req: Request, res: Response, _: NextFunction) => {
-    const liteItemId = req.params.lineItemId;
-    const resp = await service.UpdateCart(
-      {
-        id: +liteItemId,
-        qty: req.body.qty,
-        customerId: 1,
-      },
-      repo
-    );
-    return res.status(200).json(resp);
+  AuthMiddleware,
+  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user;
+      if (!user) {
+        next(new Error("User not found"));
+        return;
+      }
+      const liteItemId = req.params.lineItemId;
+      const resp = await service.UpdateCart(
+        {
+          id: +liteItemId,
+          qty: req.body.qty,
+          customerId: user.id,
+        },
+        repo
+      );
+      return res.status(200).json(resp);
+    } catch (error) {
+      next(error);
+    }
   })
 );
 
 router.delete(
   "/cart/:lineItemId",
-  asyncHandler(async (req: Request, res: Response, _: NextFunction) => {
-    const liteItemId = req.params.lineItemId;
-    console.log(liteItemId);
-    const resp = await service.DeleteCart(
-      { customerId: 1, id: +liteItemId },
-      repo
-    );
-    return res.status(200).json(resp);
+  AuthMiddleware,
+  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user;
+      if (!user) {
+        next(new Error("User not found"));
+        return;
+      }
+      const liteItemId = req.params.lineItemId;
+      const resp = await service.DeleteCart(
+        { customerId: user.id, id: +liteItemId },
+        repo
+      );
+      return res.status(200).json(resp);
+    } catch (error) {
+      next(error);
+    }
   })
 );
 

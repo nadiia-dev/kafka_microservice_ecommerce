@@ -10,6 +10,10 @@ export type CartRepositoryType = {
   updateCart: (id: number, qty: number) => Promise<CartLineItem>;
   deleteCart: (id: number) => Promise<Boolean>;
   clearCartData: (id: number) => Promise<Boolean>;
+  findCartByProductId: (
+    customerId: number,
+    productId: number
+  ) => Promise<CartLineItem>;
 };
 
 const createCart = async (
@@ -76,10 +80,27 @@ const clearCartData = async (id: number): Promise<boolean> => {
   return true;
 };
 
+const findCartByProductId = async (
+  customerId: number,
+  productId: number
+): Promise<CartLineItem> => {
+  const cart = await DB.query.carts.findFirst({
+    where: (carts, { eq }) => eq(carts.customerId, customerId),
+    with: {
+      lineItems: true,
+    },
+  });
+
+  const lineItem = cart?.lineItems.find((item) => item.productId === productId);
+
+  return lineItem as CartLineItem;
+};
+
 export const CartRepository: CartRepositoryType = {
   createCart,
   getCart,
   updateCart,
   deleteCart,
   clearCartData,
+  findCartByProductId,
 };
