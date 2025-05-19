@@ -33,11 +33,11 @@ export class CaltalogService {
     return response;
   }
 
-  async getProductStock(ids: number[]) {
-    const products = await this._repo.findStock(ids);
-    if (!products) {
-      throw new Error("unable to find product stock details");
-    }
-    return products;
-  }
+  // async getProductStock(ids: number[]) {
+  //   const products = await this._repo.findStock(ids);
+  //   if (!products) {
+  //     throw new Error("unable to find product stock details");
+  //   }
+  //   return products;
+  // }
 }
