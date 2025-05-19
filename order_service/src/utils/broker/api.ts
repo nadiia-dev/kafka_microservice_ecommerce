@@ -1,9 +1,11 @@
 import axios from "axios";
-import { NotFoundError } from "../errors";
+import { AuthorizeError, NotFoundError } from "../errors";
 import { logger } from "../logger";
 import { Product } from "../../dto/product.dto";
+import { User } from "../../dto/user.model";
 
 const catalogUrl = process.env.CATALOG_URL || "http://localhost:8000";
+const authUrl = process.env.AUTH_SERVICE_BASE_URL || "http://localhost:9000";
 
 export const getProductDetails = async (productId: number) => {
   try {
@@ -12,5 +14,25 @@ export const getProductDetails = async (productId: number) => {
   } catch (e) {
     logger.error(e);
     throw new NotFoundError("product not found");
+  }
+};
+
+export const ValidateUser = async (token: string) => {
+  try {
+    console.log("ValidateUser called", token);
+    const response = await axios.get(`${authUrl}/auth/validate`, {
+      headers: {
+        Authorization: token,
+      },
+    });
+
+    console.log("response", response.data);
+
+    if (response.status !== 200) {
+      throw new AuthorizeError("user not authorised");
+    }
+    return response.data as User;
+  } catch (error) {
+    throw new AuthorizeError("user not authorised");
   }
 };
