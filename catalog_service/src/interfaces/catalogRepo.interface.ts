@@ -6,5 +6,5 @@ export interface ICatalogRepository {
   delete(id: any): Promise<Product>;
   find(limit: number, offset: number): Promise<Product[]>;
   findOne(id: number): Promise<Product | null>;
-  // findStock(ids: number[]): Promise<Product[]>;
+  findStock(ids: number[]): Promise<Product[]>;
 }
