@@ -4,11 +4,11 @@ import { CartInput } from "../dto/cart.dto";
 
 export type CartRepositoryType = {
   createCart: (input: CartInput) => Promise<{}>;
-  getCart: (id: number) => Promise<any>;
-  updateCart: (id: number, qty: number) => Promise<any>;
-  deleteCart: (id: number) => Promise<Boolean>;
-  clearCartData: (id: number) => Promise<Boolean>;
-  findCartByProductId: (customerId: number, productId: number) => Promise<any>;
+  // getCart: (id: number) => Promise<any>;
+  // updateCart: (id: number, qty: number) => Promise<any>;
+  // deleteCart: (id: number) => Promise<Boolean>;
+  // clearCartData: (id: number) => Promise<Boolean>;
+  // findCartByProductId: (customerId: number, productId: number) => Promise<any>;
 };
 
 const createCart = async (input: CartInput): Promise<{}> => {
@@ -27,7 +27,7 @@ const deleteCart = (id: number) => {};
 
 export const CartRepository: CartRepositoryType = {
   createCart,
-  getCart,
-  updateCart,
-  deleteCart,
+  // getCart,
+  // updateCart,
+  // deleteCart,
 };
