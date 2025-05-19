@@ -1,9 +1,4 @@
-import express, {
-  ErrorRequestHandler,
-  NextFunction,
-  Request,
-  Response,
-} from "express";
+import express, { ErrorRequestHandler } from "express";
 import orderRouter from "./routes/order.routes";
 import cartRouter from "./routes/cart.routes";
 

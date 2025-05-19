@@ -8,6 +8,13 @@
       "when": 1747655899735,
       "tag": "0000_clean_blazing_skull",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1747662988269,
+      "tag": "0001_pretty_mad_thinker",
+      "breakpoints": true
     }
   ]
 }

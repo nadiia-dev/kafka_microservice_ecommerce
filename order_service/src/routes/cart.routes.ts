@@ -20,7 +20,7 @@ router.post(
 
       const input: CartInput = req.body;
 
-      const resp = await service.CreateCart(input, repo);
+      const resp = await service.CreateCart({ ...input, customerId: 1 }, repo);
       return res.status(200).json(resp);
     } catch (error) {
       next(error);
@@ -31,24 +31,37 @@ router.post(
 router.get(
   "/cart",
   asyncHandler(async (req: Request, res: Response, _: NextFunction) => {
-    const resp = await service.GetCart(req.body, repo);
-    return res.status(200).json(res);
+    const resp = await service.GetCart(req.body.customerId, repo);
+    return res.status(200).json(resp);
   })
 );
 
 router.patch(
-  "/cart",
+  "/cart/:id",
   asyncHandler(async (req: Request, res: Response, _: NextFunction) => {
-    const resp = await service.UpdateCart(req.body, repo);
-    return res.status(200).json(res);
+    const liteItemId = req.params.lineItemId;
+    const resp = await service.UpdateCart(
+      {
+        id: +liteItemId,
+        qty: req.body.qty,
+        customerId: 1,
+      },
+      repo
+    );
+    return res.status(200).json(resp);
   })
 );
 
 router.delete(
-  "/cart",
+  "/cart/:lineItemId",
   asyncHandler(async (req: Request, res: Response, _: NextFunction) => {
-    const resp = await service.DeleteCart(req.body, repo);
-    return res.status(200).json(res);
+    const liteItemId = req.params.lineItemId;
+    console.log(liteItemId);
+    const resp = await service.DeleteCart(
+      { customerId: 1, id: +liteItemId },
+      repo
+    );
+    return res.status(200).json(resp);
   })
 );
 

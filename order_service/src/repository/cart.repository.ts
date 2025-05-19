@@ -1,33 +1,85 @@
+import { eq } from "drizzle-orm";
 import { DB } from "../db/db.connections";
-import { carts } from "../db/schema";
-import { CartInput } from "../dto/cart.dto";
+import { CartLineItem, cartLineItems, carts } from "../db/schema";
+import { NotFoundError } from "../utils";
+import { CartWithLineItems } from "../dto/cart.dto";
 
 export type CartRepositoryType = {
-  createCart: (input: CartInput) => Promise<{}>;
-  // getCart: (id: number) => Promise<any>;
-  // updateCart: (id: number, qty: number) => Promise<any>;
-  // deleteCart: (id: number) => Promise<Boolean>;
-  // clearCartData: (id: number) => Promise<Boolean>;
-  // findCartByProductId: (customerId: number, productId: number) => Promise<any>;
+  createCart: (customerId: number, lineItem: CartLineItem) => Promise<number>;
+  getCart: (id: number) => Promise<CartWithLineItems>;
+  updateCart: (id: number, qty: number) => Promise<CartLineItem>;
+  deleteCart: (id: number) => Promise<Boolean>;
+  clearCartData: (id: number) => Promise<Boolean>;
 };
 
-const createCart = async (input: CartInput): Promise<{}> => {
+const createCart = async (
+  customerId: number,
+  { itemName, price, productId, qty, variant }: CartLineItem
+): Promise<number> => {
   const res = await DB.insert(carts)
-    .values({ customerId: 123 })
-    .returning({ cartId: carts.id });
+    .values({ customerId })
+    .returning()
+    .onConflictDoUpdate({
+      target: carts.customerId,
+      set: { updatedAt: new Date() },
+    });
 
-  return Promise.resolve({ message: "Created" });
+  const [{ id }] = res;
+
+  if (id > 0) {
+    await DB.insert(cartLineItems).values({
+      cartId: id,
+      productId: productId,
+      itemName: itemName,
+      price: price,
+      qty: qty,
+      variant: variant,
+    });
+  }
+
+  return id;
 };
 
-const getCart = (id: number) => {};
+const getCart = async (id: number): Promise<CartWithLineItems> => {
+  const cart = await DB.query.carts.findFirst({
+    where: (carts, { eq }) => eq(carts.customerId, id),
+    with: {
+      lineItems: true,
+    },
+  });
 
-const updateCart = (id: number, qty: number) => {};
+  if (!cart) {
+    throw new NotFoundError("cart not found");
+  }
 
-const deleteCart = (id: number) => {};
+  return cart;
+};
+
+const updateCart = async (id: number, qty: number): Promise<CartLineItem> => {
+  const [cartLineItem] = await DB.update(cartLineItems)
+    .set({
+      qty: qty,
+    })
+    .where(eq(cartLineItems.id, id))
+    .returning();
+  return cartLineItem;
+};
+
+const deleteCart = async (id: number): Promise<boolean> => {
+  console.log("Proposed ID", id);
+  await DB.delete(cartLineItems).where(eq(cartLineItems.id, id)).returning();
+  return true;
+};
+
+const clearCartData = async (id: number): Promise<boolean> => {
+  await DB.delete(carts).where(eq(carts.id, id)).returning();
+  return true;
+};
 
 export const CartRepository: CartRepositoryType = {
   createCart,
-  // getCart,
-  // updateCart,
-  // deleteCart,
+  getCart,
+  updateCart,
+  deleteCart,
+  clearCartData,
 };
