@@ -1,6 +1,16 @@
+import { CartInput } from "../dto/cart.dto";
 import { CartRepositoryType } from "../repository/cart.repository";
+import { getProductDetails } from "../utils/broker";
 
-export const CreateCart = async (input: any, repo: CartRepositoryType) => {
+export const CreateCart = async (
+  input: CartInput,
+  repo: CartRepositoryType
+) => {
+  const product = await getProductDetails(input.productId);
+
+  // if (product.stock < input.qty) {
+  // }
+
   const data = repo.createCart(input);
   return data;
 };
