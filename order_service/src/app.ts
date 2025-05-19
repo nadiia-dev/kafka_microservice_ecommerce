@@ -3,20 +3,26 @@ import orderRouter from "./routes/order.routes";
 import cartRouter from "./routes/cart.routes";
 
 import cors from "cors";
-import { HandleErrorWithLogger, httpLogger } from "./utils";
+import { HandleErrorWithLogger, httpLogger, MessageBroker } from "./utils";
+import { Producer } from "kafkajs";
+import { InitializeBroker } from "./service/broker.service";
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-app.use(httpLogger);
+export const ExpressApp = async () => {
+  const app = express();
+  app.use(cors());
+  app.use(express.json());
+  app.use(httpLogger);
 
-app.use(cartRouter);
-app.use(orderRouter);
+  await InitializeBroker();
 
-app.use("/", (_req, res) => {
-  res.status(200).json({ message: "I am healthy!" });
-});
+  app.use(cartRouter);
+  app.use(orderRouter);
 
-app.use(HandleErrorWithLogger as ErrorRequestHandler);
+  app.use("/", (_req, res) => {
+    res.status(200).json({ message: "I am healthy!" });
+  });
 
-export default app;
+  app.use(HandleErrorWithLogger as ErrorRequestHandler);
+
+  return app;
+};
