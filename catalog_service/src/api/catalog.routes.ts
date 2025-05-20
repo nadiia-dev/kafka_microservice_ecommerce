@@ -4,10 +4,14 @@ import { CatalogRepository } from "../repository/catalog.repository";
 import { asyncHandler } from "../utils/asyncHandler";
 import { RequestValidator } from "../utils/requestValidator";
 import { CreateProduct, UpdateProduct } from "../dto/product.dto";
+import { BrokerService } from "../services/broker.service";
 
 const router = express.Router();
 
 const catalogService = new CaltalogService(new CatalogRepository());
+
+const brokerService = new BrokerService(catalogService);
+brokerService.initializeBroker();
 
 router.post(
   "/products",
