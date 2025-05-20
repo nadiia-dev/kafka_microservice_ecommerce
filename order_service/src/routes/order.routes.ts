@@ -60,7 +60,7 @@ router.get(
 );
 
 router.patch(
-  "/order/:id",
+  "/orders/:id",
   asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const orderId = parseInt(req.params.id);
     const status = req.body.status as OrderStatus;
@@ -70,7 +70,7 @@ router.patch(
 );
 
 router.delete(
-  "/order/:id",
+  "/orders/:id",
   asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
     if (!user) {
@@ -79,6 +79,15 @@ router.delete(
     }
     const orderId = parseInt(req.params.id);
     const response = await service.DeleteOrder(orderId, repo);
+    return res.status(200).json(response);
+  })
+);
+
+router.get(
+  "/orders/:id/checkout",
+  asyncHandler(async (req: Request, res: Response) => {
+    const orderNumber = parseInt(req.params.id);
+    const response = await service.CheckoutOrder(orderNumber, repo);
     return res.status(200).json(response);
   })
 );

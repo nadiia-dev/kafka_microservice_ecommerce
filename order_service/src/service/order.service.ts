@@ -1,4 +1,8 @@
-import { OrderLineItemType, OrderWithLineItems } from "../dto/order.dto";
+import {
+  InProcessOrder,
+  OrderLineItemType,
+  OrderWithLineItems,
+} from "../dto/order.dto";
 import { CartRepositoryType } from "../repository/cart.repository";
 import { OrderRepositoryType } from "../repository/order.repositiory";
 import { MessageType, OrderStatus } from "../types";
@@ -80,4 +84,26 @@ export const DeleteOrder = async (
 
 export const HandleSubscription = async (message: MessageType) => {
   console.log("Message received by order Kafka consumer", message);
+};
+
+export const CheckoutOrder = async (
+  orderNumber: number,
+  repo: OrderRepositoryType
+) => {
+  const order = await repo.findOrderByNumber(orderNumber);
+  if (!order) {
+    throw new Error("Order not found");
+  }
+
+  const checkoutOrder: InProcessOrder = {
+    id: order.id,
+    orderNumber: order.orderNumber,
+    status: order.status,
+    customerId: order.customerId,
+    amount: Number(order.amount),
+    createdAt: order.createdAt,
+    updatedAt: order.updatedAt,
+  };
+
+  return checkoutOrder;
 };
